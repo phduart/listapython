@@ -1,0 +1,141 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Clientes</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'styles/bootstrap.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'styles/main.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'styles/signin.css' %}">
+	<meta name="viewport" content="width=device-width">
+	<script type="text/javascript">
+			function validarCPF(cpf) {	
+				cpf = cpf.replace(/[^\d]+/g,'');	
+				if(cpf == '') return false;	
+				// Elimina CPFs invalidos conhecidos	
+				if (cpf.length != 11 || 
+					cpf == "00000000000" || 
+					cpf == "11111111111" || 
+					cpf == "22222222222" || 
+					cpf == "33333333333" || 
+					cpf == "44444444444" || 
+					cpf == "55555555555" || 
+					cpf == "66666666666" || 
+					cpf == "77777777777" || 
+					cpf == "88888888888" || 
+					cpf == "99999999999")
+						document.getElementById('cpf_cnpj').value='';
+						return alert("CPF inválido");
+
+				// Valida 1o digito	
+				add = 0;	
+				for (i=0; i < 9; i ++)		
+					add += parseInt(cpf.charAt(i)) * (10 - i);	
+					rev = 11 - (add % 11);	
+					if (rev == 10 || rev == 11)		
+						rev = 0;	
+					if (rev != parseInt(cpf.charAt(9)))	
+						document.getElementById('cpf_cnpj').value='';	
+						return alert("CPF inválido");		
+				// Valida 2o digito	
+				add = 0;	
+				for (i = 0; i < 10; i ++)		
+					add += parseInt(cpf.charAt(i)) * (11 - i);	
+				rev = 11 - (add % 11);	
+				if (rev == 10 || rev == 11)	
+					rev = 0;	
+				if (rev != parseInt(cpf.charAt(10)))
+					document.getElementById('cpf_cnpj').value='';
+					return alert("CPF inválido");		
+				return true;   
+			}
+
+			var total = 0.00;
+			cont = 0;
+	</script>
+</head>
+<body>
+	<div class="col-lg-12">
+		<a href="/lista"><button type="button" class="btn btn-info">Média Clientes - ID</button></a>
+		<hr>
+		<div class="panel panel-default">			
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th>Código Cliente</th>
+					    <th>Nome</th>
+					    <th>CPF</th>
+					    <th>Ativo</th>
+					    <th>Saldo</th>
+					</tr>
+				</thead>
+				{% for cliente in clientes %}
+					<tr>
+						<td>{{cliente.id}}</a></td>
+						<td>{{cliente.nm_costume}}</td>
+						<td>{{cliente.cpf_cnpj}}</td>
+						<td>{{cliente.is_active}}</td>
+						<td>{{cliente.vl_total}}</td>
+					</tr>
+					<script> 
+						total += parseInt({{cliente.vl_total}});
+						cont++;
+					</script>	
+				{% endfor %}
+				<hr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>Total:</td>
+					<td><script>
+							document.write(total.toFixed(2));
+						</script>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>Média:</td>
+					<td>
+						<script>
+							total = total/cont;
+							document.write(total.toFixed(2));
+						</script>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<form class="form-signin" action="clientes/salvar" method="post">
+			{% csrf_token %}
+			<div class="form-group">
+		        <label for="id">ID</label> 
+		        <input type="text" class="form-control" id="id" name="id" placeholder="Ex: 2010" required/>
+		    </div>
+		    <div class="form-group">
+		        <label for="nome">Nome</label> 
+		        <input type="text" class="form-control" id="nm_costume" name="nm_costume" placeholder="Ex: Paulo Duarte" required/>
+		    </div>
+		    <div class="form-group">
+		        <label for="cpf">CPF</label> 
+		        <input  minlength="11" maxlength="11" type="text" class="form-control" id="cpf_cnpj" name="cpf_cnpj" placeholder="XXXXXXXXXXX" required/>
+		    </div>
+		    <div class="form-group">
+			    <label  for="plano">Ativo</label>
+			    <select class="form-control" id="is_active" name="is_active" required>
+			      <option>Y</option>
+			      <option>N</option>
+			    </select>
+			</div>
+		    <div class="form-group">
+		        <label for="valor">Saldo:</label> 
+		        <input type="number" step=".01" class="form-control" id="valor" name="valor" placeholder="99.00" required/>
+		    </div>
+		    <hr>
+		    <button type="submit" class="btn btn-success">Cadastrar</button>
+		</form>
+		
+	</div>
+</body>
+</html>
